@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"target": "es2019",
+		"removeComments": false,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"alwaysStrict": true,
+		"allowSyntheticDefaultImports": true,
+		"pretty": true,
+		"outDir": "./dist",
+		"lib": ["es2019"],
+		"skipLibCheck": true
+	}
+}
