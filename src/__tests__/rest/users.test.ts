@@ -1,8 +1,14 @@
 import { FastifyInstance } from 'fastify';
 import { mockUser } from '../../routes/users/UsersMap';
 import Util from '../../util/Util';
+import { start } from '../..';
 
 let fastify: FastifyInstance;
+
+beforeAll(async done => {
+  fastify = await start();
+  done();
+});
 
 describe('User', () => {
   it('Get User with an invalid ID', async done => {
