@@ -6,18 +6,18 @@ export default {
   mockData<T extends { id: T['id'] }>(data: T) {
     return new Map([[data.id, data]]);
   },
-  async flattenPaths(folder: string, subfolder = '') {
-    const parents = await fs.readdir(join(__dirname, '..', folder));
-    const childrenPaths = parents.reduce((files, parent) => {
-      const parentDir = join(__dirname, '..', folder, parent, subfolder);
-      files.add(
-        fs
-          .readdir(parentDir)
-          .then(children => children.map(child => join(parentDir, child)))
-      );
-      return files;
-    }, new Set() as Set<Promise<string[]>>);
-    return Promise.all(childrenPaths).then(paths => paths.flat());
+  async walk(
+    dir: string,
+    fileFilter: (file: string) => boolean
+  ): Promise<string[]> {
+    const files = await fs.readdir(dir);
+    return Promise.all(
+      files.map(async file => {
+        const fileDir = join(dir, file);
+        const stats = await fs.stat(fileDir);
+        return stats.isDirectory() ? this.walk(fileDir, fileFilter) : fileDir;
+      })
+    ).then(files => files.flat().filter(fileFilter));
   },
   mockRequest: (
     fastify: FastifyInstance,

@@ -1,6 +1,7 @@
 import * as Fastify from 'fastify';
 import Util from './util/Util';
 import { HTTPMethod } from 'fastify';
+import { join } from 'path';
 
 export const fastify = Fastify();
 const test = process.argv.some(arg => arg.includes('jest'));
@@ -16,12 +17,14 @@ fastify.addHook('preValidation', (request, reply, done) => {
 });
 
 export async function start() {
-  const methodPaths = await Util.flattenPaths('routes', 'methods');
+  const endpointPaths = await Util.walk(join(__dirname, 'rest'), file =>
+    /\\[A-Z]+\.js/.test(file)
+  );
   await Promise.all(
-    methodPaths.map(methodPath =>
+    endpointPaths.map(endpointPath =>
       fastify.route({
-        method: methodPath.match(/\\methods\\([A-Z]+).[tj]s/)![1] as HTTPMethod,
-        ...require(methodPath).default
+        method: endpointPath.match(/([A-Z]+).[tj]s/)![1] as HTTPMethod,
+        ...require(endpointPath).default
       })
     )
   );
