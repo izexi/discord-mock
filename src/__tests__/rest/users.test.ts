@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { mockUser } from '../../routes/users/UsersMap';
 import Util from '../../util/Util';
 import { start } from '../..';
+import { mockUser } from '../../rest/users/UsersMap';
 
 let fastify: FastifyInstance;
 
@@ -12,21 +12,19 @@ beforeAll(async done => {
 
 describe('User', () => {
   it('Get User with an invalid ID', async done => {
-    const response = await Util.mockRequest(fastify, 'GET', '000');
-    expect(response.statusCode).toBe(404);
-    expect(response.payload).toBe(
-      JSON.stringify({
-        message: 'Unknown User',
-        code: 10013
-      })
-    );
+    const response = await Util.mockRequest('GET', 'users/000');
+    expect(response.status).toBe(404);
+    expect(response.json()).resolves.toBe({
+      message: 'Unknown User',
+      code: 10013
+    });
     done();
   });
 
   it('Get User with a valid ID', async done => {
-    const response = await Util.mockRequest(fastify, 'GET', mockUser.id);
-    expect(response.statusCode).toBe(200);
-    expect(response.payload).toBe(JSON.stringify(mockUser));
+    const response = await Util.mockRequest('GET', `users/${mockUser.id}`);
+    expect(response.status).toBe(200);
+    expect(response.json()).resolves.toBe(mockUser);
     done();
   });
 });

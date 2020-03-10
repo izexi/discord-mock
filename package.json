@@ -42,10 +42,14 @@
         "tsConfig": "tsconfig.json"
       }
     },
-    "testMatch": ["**/__tests__/**/*.ts?(x)"]
+    "testMatch": [
+      "**/__tests__/**/*.ts?(x)"
+    ]
   },
   "dependencies": {
+    "@types/node-fetch": "^2.5.5",
     "fastify": "^2.12.1",
-    "fastify-autoload": "^1.2.2"
+    "fastify-autoload": "^1.2.2",
+    "node-fetch": "^2.6.0"
   }
 }

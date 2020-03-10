@@ -1,6 +1,7 @@
 import { FastifyInstance, HTTPMethod } from 'fastify';
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import fetch from 'node-fetch';
 
 export default {
   mockData<T extends { id: T['id'] }>(data: T) {
@@ -19,14 +20,9 @@ export default {
       })
     ).then(files => files.flat().filter(fileFilter));
   },
-  mockRequest: (
-    fastify: FastifyInstance,
-    method: HTTPMethod,
-    ...params: string[]
-  ) =>
-    fastify.inject({
+  mockRequest: (method: HTTPMethod, url: string) =>
+    fetch(`http://localhost:3000/${url}`, {
       method,
-      url: `/users/${params.join('/')}`,
       headers: {
         Authorization:
           'Bot MzU4NDA0MjA3NDMyMzAyNTkz.XmOtdQ.5LNoSt7UHE0ZAw3cRbDvymBgets'
