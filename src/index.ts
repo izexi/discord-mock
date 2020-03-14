@@ -1,15 +1,15 @@
 import * as Fastify from 'fastify';
-import Util from './util/Util';
-import { HTTPMethod } from 'fastify';
 import { join } from 'path';
+import { promises as fs } from 'fs';
 
 export const fastify = Fastify();
 const test = process.argv.some(arg => arg.includes('jest'));
 
 fastify.addHook('preValidation', (request, reply, done) => {
   const authHeader = request.headers.authorization;
+  // https://github.com/b1naryth1ef/disco/blob/371602fa4a2d45a017401372a45eefbb0841537a/disco/util/token.py#L3
   if (!authHeader || !/Bot \w{24}\.[\w-]{6}\..{27}/.test(authHeader))
-    reply.code(400).send({
+    reply.code(401).send({
       message: '401: Unauthorized',
       code: 0
     });
@@ -17,18 +17,20 @@ fastify.addHook('preValidation', (request, reply, done) => {
 });
 
 export async function start() {
-  const endpointPaths = await Util.walk(join(__dirname, 'rest'), file =>
-    /\\[A-Z]+\.js/.test(file)
-  );
+  const endpointsPath = join(__dirname, 'rest');
+  const endpointFiles = await fs
+    .readdir(endpointsPath)
+    .then(fileOrFolders =>
+      fileOrFolders.filter(fileOrFolder => /[tj]s$/.test(fileOrFolder))
+    );
   await Promise.all(
-    endpointPaths.map(endpointPath =>
-      fastify.route({
-        method: endpointPath.match(/([A-Z]+).[tj]s/)![1] as HTTPMethod,
-        ...require(endpointPath).default
+    endpointFiles.map(endpointFile =>
+      fastify.register(require(join(endpointsPath, endpointFile)).default, {
+        prefix: endpointFile.split('.')![0]
       })
     )
   );
-  if (!test) await fastify.listen(3000);
+  await fastify.listen(3000);
   return fastify;
 }
 
