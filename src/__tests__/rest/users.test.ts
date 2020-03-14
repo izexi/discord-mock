@@ -87,7 +87,6 @@ describe('User', () => {
 
   it('Create DM with an invalid ID', async done => {
     const response = await Util.mockRequest('POST', 'users/@me/channels', {
-      // eslint-disable-next-line @typescript-eslint/camelcase
       recipient_id: '000'
     });
     expect(response.status).toBe(400);

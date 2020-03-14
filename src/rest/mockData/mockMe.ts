@@ -21,7 +21,6 @@ export default {
   email: null,
   verified: true,
   locale: 'en-US',
-  // eslint-disable-next-line @typescript-eslint/camelcase
   mfa_enabled: true,
   flags: 0
 } as Me;
