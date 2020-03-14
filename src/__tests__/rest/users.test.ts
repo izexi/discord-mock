@@ -1,8 +1,8 @@
-import Util from '../../util/Util';
 import { start } from '../..';
-import { mockUser } from '../../rest/mockData/usersMap';
 import { mockPartialGuilds } from '../../rest/mockData/guildsMap';
 import mockMe from '../../rest/mockData/mockMe';
+import { mockUser } from '../../rest/mockData/usersMap';
+import Util from '../../util/Util';
 
 beforeAll(start);
 
