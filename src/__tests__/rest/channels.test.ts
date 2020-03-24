@@ -3,7 +3,7 @@ import { mockChannel } from '../../rest/mockData/channelsMap';
 import mockMessages, { mockMessage } from '../../rest/mockData/messagesMap';
 import { start } from '../..';
 
-beforeAll(start);
+beforeAll(() => start(1));
 
 describe('User', () => {
   it('Get Channel with an invalid ID', async done => {

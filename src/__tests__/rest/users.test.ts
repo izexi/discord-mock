@@ -4,7 +4,7 @@ import mockMe from '../../rest/mockData/mockMe';
 import { mockUser } from '../../rest/mockData/usersMap';
 import Util from '../../util/Util';
 
-beforeAll(start);
+beforeAll(() => start(2));
 
 describe('User', () => {
   it('Get Current User', async done => {

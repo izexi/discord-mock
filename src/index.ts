@@ -16,7 +16,8 @@ fastify.addHook('preValidation', (request, reply, done) => {
   done();
 });
 
-export async function start() {
+export async function start(port = 3000) {
+  process.env.PORT = port.toString();
   const endpointsPath = join(__dirname, 'rest');
   const endpointFiles = await fs
     .readdir(endpointsPath)
@@ -30,7 +31,7 @@ export async function start() {
       })
     )
   );
-  await fastify.listen(3000);
+  await fastify.listen(port);
   return fastify;
 }
 
