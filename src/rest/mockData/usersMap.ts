@@ -1,6 +1,6 @@
 import Util from '../../util/Util';
 
-interface User {
+export interface User {
   id: string;
   username: string;
   discriminator: string;
