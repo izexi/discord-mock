@@ -1,8 +1,7 @@
-import { start } from '../..';
-import mockMe from '../../rest/mockData/mockMe';
 import Util from '../../util/Util';
 import { mockChannel } from '../../rest/mockData/channelsMap';
 import mockMessages, { mockMessage } from '../../rest/mockData/messagesMap';
+import { start } from '../..';
 
 beforeAll(start);
 
@@ -27,44 +26,6 @@ describe('User', () => {
     done();
   });
 
-  it('Modify Channel (PUT)', async done => {
-    const response = await Util.mockRequest('PUT', 'channels', {
-      username: 'foo'
-    });
-    expect(response.status).toBe(200);
-    const expectedMe = mockMe;
-    expectedMe.username = 'foo';
-    expect(response.json()).resolves.toEqual(expectedMe);
-    done();
-  });
-
-  it('Modify Channel (PATCH)', async done => {
-    const response = await Util.mockRequest(
-      'PATCH',
-      `channels/${mockChannel.id}`,
-      { name: 'foo' }
-    );
-    expect(response.status).toBe(200);
-    const expectedChannel = mockChannel;
-    expectedChannel.name = 'name';
-    expect(response.json()).resolves.toEqual(expectedChannel);
-    done();
-  });
-
-  it('Delete Channel', async done => {
-    const response = await Util.mockRequest(
-      'DELETE',
-      `channels/${mockChannel.id}`
-    );
-    expect(response.status).toBe(200);
-    expect(
-      Util.mockRequest('GET', `channels/${mockChannel.id}`).then(
-        res => res.status
-      )
-    ).resolves.toBe(400);
-    done();
-  });
-
   // TODO: Test query string params
   it('Get Channel Messages', async done => {
     const response = await Util.mockRequest(
@@ -72,7 +33,7 @@ describe('User', () => {
       `channels/${mockChannel.id}/messages`
     );
     expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual(mockMessages);
+    expect(response.json()).resolves.toEqual([...mockMessages.values()]);
     done();
   });
 
@@ -115,21 +76,6 @@ describe('User', () => {
     const expectedMessage = mockMessage;
     expectedMessage.content = 'bar';
     expect(response.json()).resolves.toEqual(expectedMessage);
-    done();
-  });
-
-  it('Delete Message', async done => {
-    const response = await Util.mockRequest(
-      'DELETE',
-      `channels/${mockChannel.id}/messages/${mockMessage.id}`
-    );
-    expect(response.status).toBe(200);
-    expect(
-      Util.mockRequest(
-        'GET',
-        `channels/${mockChannel.id}/messages/${mockMessage.id}`
-      ).then(res => res.status)
-    ).resolves.toBe(400);
     done();
   });
 
@@ -178,6 +124,56 @@ describe('User', () => {
         .then(res => res.json())
         .then(message => message.pinned)
     ).resolves.toBe(false);
+    done();
+  });
+
+  it('Delete Message', async done => {
+    const response = await Util.mockRequest(
+      'DELETE',
+      `channels/${mockChannel.id}/messages/${mockMessage.id}`
+    );
+    expect(response.status).toBe(204);
+    expect(
+      Util.mockRequest(
+        'GET',
+        `channels/${mockChannel.id}/messages/${mockMessage.id}`
+      ).then(res => res.status)
+    ).resolves.toBe(404);
+    done();
+  });
+
+  it('Modify Channel (PUT)', async done => {
+    const response = await Util.mockRequest('PUT', 'channels', {
+      name: 'foo'
+    });
+    expect(response.status).toBe(200);
+    done();
+  });
+
+  it('Modify Channel (PATCH)', async done => {
+    const response = await Util.mockRequest(
+      'PATCH',
+      `channels/${mockChannel.id}`,
+      { name: 'foo' }
+    );
+    expect(response.status).toBe(200);
+    const expectedChannel = mockChannel;
+    expectedChannel.name = 'foo';
+    expect(response.json()).resolves.toEqual(expectedChannel);
+    done();
+  });
+
+  it('Delete Channel', async done => {
+    const response = await Util.mockRequest(
+      'DELETE',
+      `channels/${mockChannel.id}`
+    );
+    expect(response.status).toBe(200);
+    expect(
+      Util.mockRequest('GET', `channels/${mockChannel.id}`).then(
+        res => res.status
+      )
+    ).resolves.toBe(404);
     done();
   });
 });
