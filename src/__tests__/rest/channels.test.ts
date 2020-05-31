@@ -1,15 +1,12 @@
-import Util from '../../util/Util';
-import { mockChannel } from '../../rest/mockData/channelsMap';
-import mockMessages, { mockMessage } from '../../rest/mockData/messagesMap';
-import { start } from '../..';
+import Util from '../../util';
+import * as mockChannel from '../../rest/mockData/channel.json';
+import * as mockMessage from '../../rest/mockData/message.json';
 
-beforeAll(() => start(1));
-
-describe('User', () => {
+describe('channels endpoint', () => {
   it('Get Channel with an invalid ID', async done => {
     const response = await Util.mockRequest('GET', 'channels/000');
-    expect(response.status).toEqual(404);
-    expect(response.json()).resolves.toEqual({
+    expect(response.statusCode).toEqual(404);
+    expect(response.json()).toEqual({
       message: 'Unknown Channel',
       code: 10013
     });
@@ -21,8 +18,8 @@ describe('User', () => {
       'GET',
       `channels/${mockChannel.id}`
     );
-    expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual(mockChannel);
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(mockChannel);
     done();
   });
 
@@ -32,8 +29,8 @@ describe('User', () => {
       'GET',
       `channels/${mockChannel.id}/messages`
     );
-    expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual([...mockMessages.values()]);
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual([mockMessage]);
     done();
   });
 
@@ -42,8 +39,8 @@ describe('User', () => {
       'GET',
       `channels/${mockChannel.id}/messages/${mockMessage.id}`
     );
-    expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual(mockMessage);
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(mockMessage);
     done();
   });
 
@@ -56,10 +53,8 @@ describe('User', () => {
         content: 'foo'
       }
     );
-    expect(response.status).toBe(200);
-    expect(
-      response.json().then(message => message.content === 'foo')
-    ).resolves.toBe(true);
+    expect(response.statusCode).toBe(200);
+    expect(response.json().content === 'foo').toBe(true);
     done();
   });
 
@@ -72,10 +67,10 @@ describe('User', () => {
       `channels/${mockChannel.id}/messages/${mockMessage.id}`,
       { content: 'bar' }
     );
-    expect(response.status).toBe(200);
+    expect(response.statusCode).toBe(200);
     const expectedMessage = mockMessage;
     expectedMessage.content = 'bar';
-    expect(response.json()).resolves.toEqual(expectedMessage);
+    expect(response.json()).toEqual(expectedMessage);
     done();
   });
 
@@ -86,10 +81,8 @@ describe('User', () => {
       'GET',
       `channels/${mockChannel.id}/pins`
     );
-    expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual(
-      [...mockMessages.values()].filter(message => message.pinned)
-    );
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual([]);
     done();
   });
 
@@ -98,7 +91,7 @@ describe('User', () => {
       'PUT',
       `channels/${mockChannel.id}/pins/${mockMessage.id}`
     );
-    expect(response.status).toBe(204);
+    expect(response.statusCode).toBe(204);
     expect(
       Util.mockRequest(
         'GET',
@@ -115,7 +108,7 @@ describe('User', () => {
       'DELETE',
       `channels/${mockChannel.id}/pins/${mockMessage.id}`
     );
-    expect(response.status).toBe(204);
+    expect(response.statusCode).toBe(204);
     expect(
       Util.mockRequest(
         'GET',
@@ -132,12 +125,12 @@ describe('User', () => {
       'DELETE',
       `channels/${mockChannel.id}/messages/${mockMessage.id}`
     );
-    expect(response.status).toBe(204);
+    expect(response.statusCode).toBe(204);
     expect(
       Util.mockRequest(
         'GET',
         `channels/${mockChannel.id}/messages/${mockMessage.id}`
-      ).then(res => res.status)
+      ).then(res => res.statusCode)
     ).resolves.toBe(404);
     done();
   });
@@ -146,7 +139,7 @@ describe('User', () => {
     const response = await Util.mockRequest('PUT', 'channels', {
       name: 'foo'
     });
-    expect(response.status).toBe(200);
+    expect(response.statusCode).toBe(200);
     done();
   });
 
@@ -156,10 +149,10 @@ describe('User', () => {
       `channels/${mockChannel.id}`,
       { name: 'foo' }
     );
-    expect(response.status).toBe(200);
+    expect(response.statusCode).toBe(200);
     const expectedChannel = mockChannel;
     expectedChannel.name = 'foo';
-    expect(response.json()).resolves.toEqual(expectedChannel);
+    expect(response.json()).toEqual(expectedChannel);
     done();
   });
 
@@ -168,10 +161,10 @@ describe('User', () => {
       'DELETE',
       `channels/${mockChannel.id}`
     );
-    expect(response.status).toBe(200);
+    expect(response.statusCode).toBe(200);
     expect(
       Util.mockRequest('GET', `channels/${mockChannel.id}`).then(
-        res => res.status
+        res => res.statusCode
       )
     ).resolves.toBe(404);
     done();

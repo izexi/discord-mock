@@ -1,23 +1,20 @@
-import { start } from '../..';
-import { mockPartialGuilds } from '../../rest/mockData/guildsMap';
-import mockMe from '../../rest/mockData/mockMe';
-import { mockUser } from '../../rest/mockData/usersMap';
-import Util from '../../util/Util';
+import Util from '../../util';
+import * as mockMe from '../../rest/mockData/me.json';
+import * as mockUser from '../../rest/mockData/user.json';
+import * as mockGuild from '../../rest/mockData/guild.json';
 
-beforeAll(() => start(2));
-
-describe('User', () => {
+describe('users endpoint', () => {
   it('Get Current User', async done => {
-    const response = await Util.mockRequest('GET', `users/@me`);
-    expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual(mockMe);
+    const response = await Util.mockRequest('GET', '/users/@me');
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(mockMe);
     done();
   });
 
   it('Get User with an invalid ID', async done => {
-    const response = await Util.mockRequest('GET', 'users/000');
-    expect(response.status).toEqual(404);
-    expect(response.json()).resolves.toEqual({
+    const response = await Util.mockRequest('GET', '/users/0');
+    expect(response.statusCode).toEqual(404);
+    expect(response.json()).toEqual({
       message: 'Unknown User',
       code: 10013
     });
@@ -25,18 +22,18 @@ describe('User', () => {
   });
 
   it('Get User with a valid ID', async done => {
-    const response = await Util.mockRequest('GET', `users/${mockUser.id}`);
-    expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual(mockUser);
+    const response = await Util.mockRequest('GET', `/users/${mockUser.id}`);
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(mockUser);
     done();
   });
 
   it('Modify Current User with an invalid username', async done => {
-    const response = await Util.mockRequest('PATCH', 'users/@me', {
+    const response = await Util.mockRequest('PATCH', '/users/@me', {
       username: 'e'
     });
-    expect(response.status).toEqual(400);
-    expect(response.json()).resolves.toEqual({
+    expect(response.statusCode).toEqual(400);
+    expect(response.json()).toEqual({
       code: 50035,
       errors: {
         username: {
@@ -54,34 +51,32 @@ describe('User', () => {
   });
 
   it('Modify Current User', async done => {
-    const response = await Util.mockRequest('PATCH', 'users/@me', {
+    const response = await Util.mockRequest('PATCH', '/users/@me', {
       username: 'foo'
     });
-    expect(response.status).toBe(200);
+    expect(response.statusCode).toBe(200);
     const expectedMe = mockMe;
     expectedMe.username = 'foo';
-    expect(response.json()).resolves.toEqual(expectedMe);
+    expect(response.json()).toEqual(expectedMe);
     done();
   });
 
   it('Get Current User Guilds ', async done => {
-    const response = await Util.mockRequest('GET', 'users/@me/guilds');
-    expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual(mockPartialGuilds);
+    const response = await Util.mockRequest('GET', '/users/@me/guilds');
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual([mockGuild]);
     done();
   });
 
   it('Leave Guild', async done => {
     const response = await Util.mockRequest(
       'DELETE',
-      'users/@me/guilds/0123456789876543210'
+      'users/@me/guilds/953278943694159264'
     );
-    expect(response.status).toBe(204);
+    expect(response.statusCode).toBe(204);
     expect(
       Util.mockRequest('GET', 'users/@me/guilds').then(res => res.json())
-    ).resolves.toEqual(
-      mockPartialGuilds.filter(({ id }) => id !== '0123456789876543210')
-    );
+    ).resolves.toEqual([]);
     done();
   });
 
@@ -89,8 +84,8 @@ describe('User', () => {
     const response = await Util.mockRequest('POST', 'users/@me/channels', {
       recipient_id: '000'
     });
-    expect(response.status).toBe(400);
-    expect(response.json()).resolves.toEqual({
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({
       message: 'Invalid Recipient(s)',
       code: 50033
     });
@@ -101,14 +96,8 @@ describe('User', () => {
     const response = await Util.mockRequest('POST', 'users/@me/channels', {
       recipient_id: '191615925336670208'
     });
-    expect(response.status).toBe(200);
-    expect(response.json()).resolves.toEqual({
-      id: '777777777777777777',
-      last_message_id: null,
-      type: 1,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      recipients: [(({ bot, system, ...user }) => user)(mockUser)]
-    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().recipients[0].id).toEqual('191615925336670208');
     done();
   });
 });
