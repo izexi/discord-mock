@@ -1,0 +1,21 @@
+{
+  "id": "904509181654558920",
+  "channel_id": "839184017269506504",
+  "author": {
+    "id": "191615925336670208",
+    "username": "Havoc",
+    "discriminator": "7078",
+    "avatar": "a_dde53f5afa943f4a2628d47045ef92c3",
+    "bot": false,
+    "system": false
+  },
+  "content": "foo",
+  "timestamp": "2020-05-29T17:21:09.566Z",
+  "edited_timestamp": null,
+  "tts": false,
+  "mention_everyone": false,
+  "mentions": [],
+  "mention_roles": [],
+  "pinned": false,
+  "type": 0
+}
