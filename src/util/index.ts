@@ -1,8 +1,8 @@
 import { HTTPMethod, FastifyRequest, FastifyReply } from 'fastify';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import fetch from 'node-fetch';
 import { ServerResponse } from 'http';
+import { start } from '..';
 
 export default {
   generateID(map?: Map<string, object>): string {
@@ -12,6 +12,7 @@ export default {
     if (!map?.has(id)) return id;
     return this.generateID(map);
   },
+
   getEntity<T>(
     type: 'Channel' | 'Message',
     map: Map<string, T>,
@@ -26,14 +27,7 @@ export default {
       });
     return entity;
   },
-  mockData<T extends { id: T['id'] }>(data: T | T[]) {
-    return new Map(
-      Array.isArray(data) ? data.map(this.formatData) : [this.formatData(data)]
-    );
-  },
-  formatData<T extends { id: T['id'] }>(data: T): [T['id'], T] {
-    return [data.id, data];
-  },
+
   async walk(
     dir: string,
     fileFilter: (file: string) => boolean
@@ -47,18 +41,21 @@ export default {
       })
     ).then(files => files.flat().filter(fileFilter));
   },
+
   mockRequest: (
     method: HTTPMethod,
     url: string,
-    body?: { [key: string]: string }
+    payload?: { [k: string]: string }
   ) =>
-    fetch(`http://localhost:${process.env.PORT}/${url}`, {
-      method,
-      headers: {
-        Authorization:
-          'Bot MzU4NDA0MjA3NDMyMzAyNTkz.XmOtdQ.5LNoSt7UHE0ZAw3cRbDvymBgets',
-        ...(body ? { 'Content-Type': 'application/json' } : {})
-      },
-      ...(body ? { body: JSON.stringify(body) } : {})
-    })
+    start().then(fastify =>
+      fastify.inject({
+        method,
+        url,
+        headers: {
+          Authorization:
+            'Bot MzU4NDA0MjA3NDMyMzAyNTkz.XmOtdQ.5LNoSt7UHE0ZAw3cRbDvymBgets'
+        },
+        ...(payload ? { payload } : {})
+      })
+    )
 };
