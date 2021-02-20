@@ -1,0 +1,12 @@
+{
+  "id": "695463846347421873",
+  "username": "Mock Client",
+  "avatar": null,
+  "discriminator": "7078",
+  "bot": true,
+  "email": null,
+  "verified": true,
+  "locale": "en-US",
+  "mfa_enabled": true,
+  "flags": 0
+}

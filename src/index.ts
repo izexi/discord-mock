@@ -1,9 +1,22 @@
 import * as Fastify from 'fastify';
 import { join } from 'path';
 import { promises as fs } from 'fs';
+import cache from './util/cache';
+import * as me from './rest/mockData/me.json';
+import * as user from './rest/mockData/user.json';
+import * as guild from './rest/mockData/guild.json';
+import * as message from './rest/mockData/message.json';
+import * as channel from './rest/mockData/channel.json';
 
-export const fastify = Fastify();
+const fastify = Fastify();
 const test = process.argv.some(arg => arg.includes('jest'));
+let booted = false;
+
+cache.users.set(me.id, me);
+cache.users.set(user.id, user);
+cache.guilds.set(guild.id, guild);
+cache.messages.set(message.id, message);
+cache.channels.set(channel.id, channel);
 
 fastify.addHook('preValidation', (request, reply, done) => {
   const authHeader = request.headers.authorization;
@@ -17,6 +30,7 @@ fastify.addHook('preValidation', (request, reply, done) => {
 });
 
 export async function start() {
+  if (booted) return fastify;
   const endpointsPath = join(__dirname, 'rest');
   const endpointFiles = await fs
     .readdir(endpointsPath)
@@ -30,7 +44,8 @@ export async function start() {
       })
     )
   );
-  await fastify.listen(3000);
+  if (!test) await fastify.listen(3000);
+  booted = true;
   return fastify;
 }
 

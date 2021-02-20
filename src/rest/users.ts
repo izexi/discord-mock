@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { mockPartialGuilds } from './mockData/guildsMap';
-import mockMe from './mockData/mockMe';
-import usersMap from './mockData/usersMap';
+import * as mockMe from '../rest/mockData/me.json';
+import cache from '../util/cache';
+import util from '../util';
 
 export default function(fastify: FastifyInstance, _: null, next: () => void) {
   // https://discordapp.com/developers/docs/resources/user#get-current-user
@@ -11,7 +11,7 @@ export default function(fastify: FastifyInstance, _: null, next: () => void) {
 
   // https://discordapp.com/developers/docs/resources/user#get-user
   fastify.get('/:id', (request, reply) => {
-    const user = usersMap.get(request.params.id);
+    const user = cache.users.get(request.params.id);
     if (!user)
       reply.code(404).send({
         message: 'Unknown User',
@@ -26,6 +26,7 @@ export default function(fastify: FastifyInstance, _: null, next: () => void) {
       body: { username, avatar }
     } = request;
     const { length } = username.toString();
+    const me = cache.users.get(mockMe.id);
     if (length < 2 || length > 32)
       reply.code(400).send({
         code: 50035,
@@ -42,30 +43,28 @@ export default function(fastify: FastifyInstance, _: null, next: () => void) {
         message: 'Invalid Form Body'
       });
     else {
-      mockMe.username = username.toString();
+      me.username = username.toString();
       // https://github.com/ragingwind/data-uri-regex/blob/master/index.js#L6
       if (/^(data:)([\w/+]+);(charset=[\w-]+|base64).*,(.*)/gi.test(avatar))
-        mockMe.avatar = avatar;
+        me.avatar = avatar;
     }
-    reply.code(200).send(mockMe);
+    reply.code(200).send(me);
   });
 
   // https://discordapp.com/developers/docs/resources/user#get-current-user-guilds
   fastify.get('/@me/guilds', (_, reply) => {
-    reply.code(200).send(mockPartialGuilds);
+    reply.code(200).send([...cache.guilds.values()]);
   });
 
   // https://discordapp.com/developers/docs/resources/user#leave-guild
   fastify.delete('/@me/guilds/:id', (request, reply) => {
-    const guildIndex = mockPartialGuilds.findIndex(
-      ({ id }) => id === request.params.id
-    );
-    if (guildIndex === -1)
+    const id = request.params.id;
+    if (!cache.guilds.has(id))
       reply.code(404).send({
         message: 'Unknown Guild',
         code: 10004
       });
-    mockPartialGuilds.splice(guildIndex, 1);
+    cache.guilds.delete(id);
     reply.code(204).send();
   });
 
@@ -75,25 +74,28 @@ export default function(fastify: FastifyInstance, _: null, next: () => void) {
     reply.code(200).send([]);
   });
 
-  // https://discordapp.com/developers/docs/resources/user#modify-current-user
+  // https://discord.com/developers/docs/resources/user#create-dm
   fastify.post('/@me/channels', (request, reply) => {
     const {
       body: { recipient_id }
     } = request;
-    const user = usersMap.get(recipient_id);
+    const user = cache.users.get(recipient_id);
     if (!/\d{17,19}/.test(recipient_id))
       reply.code(400).send({
         message: 'Invalid Recipient(s)',
         code: 50033
       });
-    else
-      reply.code(200).send({
-        id: '777777777777777777',
+    else {
+      const dmChannel = {
+        id: util.generateID(),
         last_message_id: null,
         type: 1,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         recipients: [(({ bot, system, ...user }) => user)(user!)]
-      });
+      };
+      cache.channels.set(dmChannel.id, dmChannel);
+      reply.code(200).send(dmChannel);
+    }
   });
 
   next();

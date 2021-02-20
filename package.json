@@ -27,7 +27,6 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
-    "eslint-plugin-simple-import-sort": "^5.0.2",
     "jest": "^25.1.0",
     "prettier": "^1.19.1",
     "prettier-eslint": "^9.0.1",
@@ -44,12 +43,12 @@
       }
     },
     "testMatch": [
-      "**/__tests__/**/*.ts?(x)"
+      "**/__tests__/**/*.test.ts?(x)"
     ]
   },
   "dependencies": {
     "@types/node-fetch": "^2.5.5",
-    "fastify": "^2.12.1",
+    "fastify": "^2.14.1",
     "fastify-autoload": "^1.2.2",
     "fastify-plugin": "^1.6.1",
     "node-fetch": "^2.6.0"
